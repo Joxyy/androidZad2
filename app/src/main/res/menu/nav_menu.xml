@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn = "navigation_view">
+
+    <group
+        android:checkableBehavior="single">
+
+
+        <item
+            android:id="@+id/dodAdmin"
+            android:title="@string/dodAdmin"/>
+        <item
+            android:id="@+id/dodStud"
+            android:title="Dodavanje studenta"/>
+        <item
+            android:id="@+id/dodSkGod"
+            android:title="Dodavanje skolske godine"/>
+        <item
+            android:id="@+id/dodPred"
+            android:title="Dodavanje predmeta u skolsku"/>
+        <item
+            android:id="@+id/dodKat"
+            android:title="Dodavanje kategorija na predmet"/>
+        <item
+            android:id="@+id/upisOcene"
+            android:title="Upis ocene"/>
+
+    </group>
+    <item
+        android:title="">
+        <menu>
+            <item
+                android:id="@+id/logout"
+                android:title="Odjavi se"/>
+        </menu>
+    </item>
+</menu>
