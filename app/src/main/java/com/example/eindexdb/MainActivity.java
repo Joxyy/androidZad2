@@ -1,6 +1,7 @@
 package com.example.eindexdb;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 
 import com.example.eindexdb.sqlite.helper.DBhelper;
@@ -27,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -36,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnLogin;
 
     DBhelper myDB;
-    ArrayList<String> studenti_id, studenti_pass, 
-    public static String UNAME = "RequestKey1";
+    ArrayList<String> studId, studPass, adminId, adminPass;
+    public static String ID = "RequestKey";
 
     //Fragment currentActFrag;
 
@@ -53,14 +55,46 @@ public class MainActivity extends AppCompatActivity {
 
         //createTablesAndInitData();
 
+        myDB=new DBhelper(MainActivity.this);
+        studId = new ArrayList<>();
+        studPass= new ArrayList<>();
+        adminId = new ArrayList<>();
+        adminPass= new ArrayList<>();
+
         btnLogin.setOnClickListener(view1 -> {
-            if (etUname.getText().toString().equals("ADMIN")&& etPass.getText().toString().equals("ADMIN")){
-                try {
-                    startAdmin(etUname.getText().toString());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+            if (!MainActivity.this.etUname.getText().toString().equals("") && !MainActivity.this.etPass.getText().toString().equals("")){
+                Cursor cursorAdmin = myDB.readAllAdmins();
+                Cursor cursorStud = myDB.readAllStudents();
+                if (etUname.getText().toString().equals("ADMIN") && etPass.getText().toString().equals("ADMIN")) {
+                    try {
+                        startAdmin();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
+                if(cursorAdmin.getCount() != 0) {
+                    while (cursorAdmin.moveToNext()) {
+                        if (etUname.getText().toString().equals(cursorAdmin.getString(1)) && etPass.getText().toString().equals(cursorAdmin.getString(2))) {
+                            try {
+                                startAdmin();
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+                if (cursorStud.getCount() != 0) {
+                    while (cursorStud.moveToNext()) {
+                        if (etUname.getText().toString().equals(cursorStud.getString(1)) && etPass.getText().toString().equals(cursorStud.getString(2))) {
+                            try {
+                                startStud(cursorStud.getLong(0));
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }else Toast.makeText(MainActivity.this, "Neispravan unos", Toast.LENGTH_SHORT).show();
+            }else Toast.makeText(MainActivity.this, "Popunite sva polja", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -75,14 +109,19 @@ public class MainActivity extends AppCompatActivity {
         dbHelper.createTables();
     }*/
 
-    public void startAdmin(String uname) throws InterruptedException {
+    public void startAdmin() throws InterruptedException {
         Intent intent = new Intent(this, AdminActivity.class);
-        intent.putExtra(UNAME, uname);
         //ReceiveMessageFromServer.setPauseReading(true);
-        gameActivityLauncher.launch(intent);
+        ActivityLauncher.launch(intent);
+    }
+    public void startStud(Long id) throws InterruptedException {
+        Intent intent = new Intent(this, StudActivity.class);
+        intent.putExtra(ID,id);
+        //ReceiveMessageFromServer.setPauseReading(true);
+        ActivityLauncher.launch(intent);
     }
 
-    ActivityResultLauncher<Intent> gameActivityLauncher = registerForActivityResult(
+    ActivityResultLauncher<Intent> ActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 //et.setText("");

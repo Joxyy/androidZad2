@@ -135,15 +135,51 @@ public class DBhelper extends SQLiteOpenHelper {
         //now we know id obtained after writing actor to a db
         return stud_id;
     }
-    Cursor readAllAdmins(){
+    public Cursor readAllAdmins(){
         String query = "SELECT * FROM " + TABLE_ADMINS;
         SQLiteDatabase db = this.getReadableDatabase();
+
+        Log.e(LOG, query);
 
         Cursor cursor = null;
         if(db!=null){
             cursor=db.rawQuery(query, null);
         }
         return cursor;
+    }
+    public Cursor readAllStudents(){
+        String query = "SELECT * FROM " + TABLE_STUDENTS;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Log.e(LOG, query);
+
+        Cursor cursor = null;
+        if(db!=null){
+            cursor=db.rawQuery(query, null);
+        }
+        return cursor;
+    }
+    @SuppressLint("Range")
+    public Student getStud(long stud_id){
+        String query = "SELECT * FROM " + TABLE_STUDENTS + " WHERE " + KEY_ID + " = " + stud_id;
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db. rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+
+        Student s = new Student();
+
+        s.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
+        s.setIme(cursor.getString(cursor.getColumnIndex(KEY_IME)));
+        s.setPrezime(cursor.getString(cursor.getColumnIndex(KEY_PASS)));
+        s.setBrIndexa(cursor.getString(cursor.getColumnIndex(KEY_INDEX)));
+        s.setJmbg(cursor.getString(cursor.getColumnIndex(KEY_JMBG)));
+
+        //predmet p =getPredmet(c.getInd(c.getColumnIndex(KEY_PREDMET
+
+        return s;
+
     }
 
     /*getting all students*/

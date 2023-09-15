@@ -37,7 +37,7 @@ public class DodStudFragment extends Fragment {
         btnDodStud = view.findViewById(R.id.btnDodStud);
 
         btnDodStud.setOnClickListener(view1 -> {
-            DBhelper myDB = new DBhelperBuilder().setContext(getActivity()).createDBhelper();
+            DBhelper myDB = new DBhelper(getActivity());
             myDB.createTables();
             myDB.addStud(etStudUname.getText().toString().trim(),
                     etStudPass.getText().toString().trim(),

@@ -39,7 +39,7 @@ public class DodAdminFragment extends Fragment {
         btnDodAdmin = view.findViewById(R.id.btnDodAdmin);
 
         btnDodAdmin.setOnClickListener(view1 -> {
-            DBhelper myDB = new DBhelperBuilder().setContext(getActivity()).createDBhelper();
+            DBhelper myDB = new DBhelper(getActivity());
             myDB.createTables();
             myDB.addAdmin(etAdminUname.getText().toString().trim(),etAdminPass.getText().toString().trim());
         });

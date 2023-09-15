@@ -13,6 +13,12 @@
         android:theme="@style/Theme.EIndexDB"
         tools:targetApi="31">
         <activity
+            android:name=".StudActivity"
+            android:exported="false"
+            android:label="STUDENT"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.EIndexDB" />
+        <activity
             android:name=".AdminActivity"
             android:exported="false" />
         <activity

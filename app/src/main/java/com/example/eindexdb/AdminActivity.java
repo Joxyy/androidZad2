@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -18,13 +19,15 @@ import com.google.android.material.navigation.NavigationView;
 
 public class AdminActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-
+    Intent intent;
     private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(layout.activity_admin);
+
+        intent = getIntent();
 
         Toolbar toolbar = findViewById(id.toolbar);
         setSupportActionBar(toolbar);
@@ -51,8 +54,9 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodAdminFragment()).commit();
         } else if (itemId == id.dodStud) {
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodStudFragment()).commit();
-        } else if (itemId == id.upisOcene) {
-            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new UpisOceneFragment()).commit();
+        } else if (itemId == id.logout) {
+            setResult(RESULT_OK, intent);
+            finish();
         } else {
             throw new IllegalStateException("Unexpected value: " + item.getItemId());
         }
