@@ -35,22 +35,27 @@ public class DBhelper extends SQLiteOpenHelper {
 
 
     //table names
-    private static final String TABLE_ADMINS = "admini";
+    private static final String TABLE_USERS = "users";
     private static final String TABLE_STUDENTS = "studenti";
-    private static final String TABLE_YEAR = "godina";
+    private static final String TABLE_YEARS = "godine";
     private static final String TABLE_SUBJECTS = "predmeti";
-    private static final String TABLE_CATEGORIES = "kategorije";
+    private static final String TABLE_KAT = "kategorije";
 
     //common column names
     private static final String KEY_ID = "_id";
     private static final String KEY_UNAME = "uname";
     private static final String KEY_PASS = "pass";
+    private static final String KEY_ROLE = "role";
     //stud column names
+    private static final String KEY_USER_ID = "userID";
     private static final String KEY_IME = "ime";
     private static final String KEY_PREZIME = "prezime";
     private static final String KEY_INDEX = "indeks";
     private static final String KEY_JMBG = "jmbg";
-    //stud column names
+    //godPred column names
+    private static final String KEY_PREDMET_ID = "predmetID";
+    private static final String KEY_GODINA_ID = "godinaID";
+    //kat column names
     private static final String KEY_PREDMET = "predmet";
     private static final String KEY_KATEGORIJA = "kategorija";
     private static final String KEY_MIN = "min ";
@@ -59,28 +64,44 @@ public class DBhelper extends SQLiteOpenHelper {
     private static final String KEY_OCENA = "ocena ";
 
     //table create statements
-    String CREATE_TABLE_ADMINS = "CREATE TABLE IF NOT EXISTS " + TABLE_ADMINS +
+    String CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS +
             " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             KEY_UNAME + " TEXT, " +
-            KEY_PASS + " TEXT);";
+            KEY_PASS + " TEXT, " +
+            KEY_ROLE + " TEXT);";
     String CREATE_TABLE_STUDENTS = "CREATE TABLE IF NOT EXISTS "
-            + TABLE_STUDENTS + " (" + KEY_ID + " INTEGER PRIMARY KEY, "
-            + KEY_UNAME + " TEXT, "
-            + KEY_PASS + " TEXT, "
+            + TABLE_STUDENTS + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_USER_ID + " INTEGER, "
             + KEY_IME + " TEXT, "
             + KEY_PREZIME + " TEXT, "
             + KEY_INDEX + " TEXT, "
             + KEY_JMBG + " INTEGER);";
+    String CREATE_TABLE_YEARS = "CREATE TABLE IF NOT EXISTS " + TABLE_YEARS +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_IME + " TEXT);";
+    String CREATE_TABLE_SUBJECTS = "CREATE TABLE IF NOT EXISTS " + TABLE_SUBJECTS +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_IME + " TEXT);";
+    String CREATE_TABLE_KAT = "CREATE TABLE IF NOT EXISTS " + TABLE_KAT +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_IME + " INTEGER, "
+            + KEY_MAX + " INTEGER, "
+            + KEY_PREDMET_ID + " INTEGER, "
+            + KEY_GODINA_ID + " INTEGER);";
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_ADMINS);
+        db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_STUDENTS);
+        db.execSQL(CREATE_TABLE_YEARS);
+        db.execSQL(CREATE_TABLE_SUBJECTS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ADMINS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_STUDENTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_YEARS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SUBJECTS);
 
     onCreate(db);
     }
@@ -89,12 +110,12 @@ public class DBhelper extends SQLiteOpenHelper {
         if(db==null)    db = getWritableDatabase();
 
         //vreating required tables
-        db.execSQL(CREATE_TABLE_ADMINS);
+        db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_STUDENTS);
     }
     public void dropTables(){   //delete tabels
 
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ADMINS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_STUDENTS);
     }
 
@@ -105,9 +126,10 @@ public class DBhelper extends SQLiteOpenHelper {
 
         values.put(KEY_UNAME, uname);
         values.put(KEY_PASS, pass);
+        values.put(KEY_ROLE, "admin");
 
         //insert row
-        long admin_id = db.insert(TABLE_ADMINS, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+        long admin_id = db.insert(TABLE_USERS, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
         if(admin_id == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
@@ -116,27 +138,38 @@ public class DBhelper extends SQLiteOpenHelper {
     }
     public long addStud(String studUname, String studPass, String studIme, String studPrezime, String studIndex, String studJmbg){
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+        ContentValues values1 = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
 
-        values.put(KEY_UNAME, studUname);
-        values.put(KEY_PASS, studPass);
-        values.put(KEY_IME, studIme);
-        values.put(KEY_PREZIME, studPrezime);
-        values.put(KEY_INDEX, studIndex);
-        values.put(KEY_JMBG, studJmbg);
+        values1.put(KEY_UNAME, studUname);
+        values1.put(KEY_PASS, studPass);
+        values1.put(KEY_ROLE, "student");
 
+        long user_id = db.insert(TABLE_USERS, null, values1);
+        if(user_id == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
+
+        ContentValues values2 = new ContentValues();
+        values2.put(KEY_USER_ID, user_id);
+        values2.put(KEY_IME, studIme);
+        values2.put(KEY_PREZIME, studPrezime);
+        values2.put(KEY_INDEX, studIndex);
+        values2.put(KEY_JMBG, studJmbg);
 
         //insert row
-        long stud_id = db.insert(TABLE_STUDENTS, null, values);
+        long stud_id = db.insert(TABLE_STUDENTS, null, values2);
         if(stud_id == -1){
             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
         }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
         //stud.setId(stud_id);
         //now we know id obtained after writing actor to a db
-        return stud_id;
+        return user_id;
     }
-    public Cursor readAllAdmins(){
-        String query = "SELECT * FROM " + TABLE_ADMINS;
+    public void addGodPred(String godina, String predmet){
+
+    }
+    public Cursor readAllUsers(){
+        String query = "SELECT * FROM " + TABLE_USERS;
         SQLiteDatabase db = this.getReadableDatabase();
 
         Log.e(LOG, query);
@@ -160,19 +193,20 @@ public class DBhelper extends SQLiteOpenHelper {
         return cursor;
     }
     @SuppressLint("Range")
-    public Student getStud(long stud_id){
-        String query = "SELECT * FROM " + TABLE_STUDENTS + " WHERE " + KEY_ID + " = " + stud_id;
+    public Student getStud(Long stud_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_STUDENTS + " WHERE " + KEY_USER_ID + " = " + stud_id;
 
         Log.e(LOG, query);
 
-        Cursor cursor = db. rawQuery(query,null);
+        Cursor cursor = db.rawQuery(query,null);
         if(cursor!=null) cursor.moveToFirst();
 
         Student s = new Student();
 
         s.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
         s.setIme(cursor.getString(cursor.getColumnIndex(KEY_IME)));
-        s.setPrezime(cursor.getString(cursor.getColumnIndex(KEY_PASS)));
+        s.setPrezime(cursor.getString(cursor.getColumnIndex(KEY_PREZIME)));
         s.setBrIndexa(cursor.getString(cursor.getColumnIndex(KEY_INDEX)));
         s.setJmbg(cursor.getString(cursor.getColumnIndex(KEY_JMBG)));
 
@@ -181,6 +215,7 @@ public class DBhelper extends SQLiteOpenHelper {
         return s;
 
     }
+
 
     /*getting all students*/
     /*@SuppressLint("Range")

@@ -1,8 +1,11 @@
 package com.example.eindexdb;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 
+import com.example.eindexdb.sqlite.helper.DBhelper;
+import com.example.eindexdb.sqlite.model.Student;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,9 +24,8 @@ import com.example.eindexdb.databinding.ActivityStudBinding;
 
 public class StudActivity extends AppCompatActivity {
     Intent intent;
-
     TextView tvIme, tvPrezime, tvIndex, tvJmbg;
-
+    DBhelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,13 @@ public class StudActivity extends AppCompatActivity {
         Long id = intent.getExtras().getLong(MainActivity.ID);
         Toast.makeText(this, "id je " + id, Toast.LENGTH_SHORT).show();
 
+        myDB=new DBhelper(StudActivity.this);
+        Student s = myDB.getStud(id);
 
+        tvIme.setText(s.getIme());
+        tvPrezime.setText(s.getPrezime());
+        tvIndex.setText(s.getBrIndexa());
+        tvJmbg.setText(s.getJmbg());
     }
 
 }

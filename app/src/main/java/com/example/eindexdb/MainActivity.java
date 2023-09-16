@@ -35,11 +35,12 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     EditText etUname;
     EditText etPass;
+    EditText etRola;
     Button btnLogin;
 
     DBhelper myDB;
     ArrayList<String> studId, studPass, adminId, adminPass;
-    public static String ID = "RequestKey";
+    public static String ID = "Requestkey";
 
     //Fragment currentActFrag;
 
@@ -51,47 +52,48 @@ public class MainActivity extends AppCompatActivity {
         //replaceFrag(LoginFragment.newInstance(null));
         etUname = (EditText) findViewById(R.id.etUname);
         etPass = (EditText) findViewById(R.id.etPass);
+        etRola = (EditText) findViewById(R.id.etRola);
         btnLogin = (Button) findViewById(R.id.btnLogin);
 
         //createTablesAndInitData();
 
         myDB=new DBhelper(MainActivity.this);
+        myDB.createTables();
+
         studId = new ArrayList<>();
         studPass= new ArrayList<>();
         adminId = new ArrayList<>();
         adminPass= new ArrayList<>();
 
         btnLogin.setOnClickListener(view1 -> {
-            if (!MainActivity.this.etUname.getText().toString().equals("") && !MainActivity.this.etPass.getText().toString().equals("")){
-                Cursor cursorAdmin = myDB.readAllAdmins();
-                Cursor cursorStud = myDB.readAllStudents();
-                if (etUname.getText().toString().equals("ADMIN") && etPass.getText().toString().equals("ADMIN")) {
+            if (!MainActivity.this.etUname.getText().toString().equals("") && !MainActivity.this.etPass.getText().toString().equals("")&&!MainActivity.this.etRola.getText().toString().equals("")){
+                Cursor cursor = myDB.readAllUsers();
+                if (etUname.getText().toString().equals("ADMIN") && etPass.getText().toString().equals("ADMIN") && etRola.getText().toString().equalsIgnoreCase("ADMIN") ) {
                     try {
                         startAdmin();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                if(cursorAdmin.getCount() != 0) {
-                    while (cursorAdmin.moveToNext()) {
-                        if (etUname.getText().toString().equals(cursorAdmin.getString(1)) && etPass.getText().toString().equals(cursorAdmin.getString(2))) {
-                            try {
-                                startAdmin();
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
+                if(cursor.getCount() != 0) {
+                    while (cursor.moveToNext()) {
+                        if (etUname.getText().toString().equals(cursor.getString(1)) && etPass.getText().toString().equals(cursor.getString(2)) && etRola.getText().toString().equalsIgnoreCase(cursor.getString(3))) {
+                            if(cursor.getString(3).equals("admin")) {
+                                try {
+                                    startAdmin();
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                            if(cursor.getString(3).equals("student")) {
+                                try {
+                                    startStud(cursor.getLong(0));
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }
-                    }
-                }
-                if (cursorStud.getCount() != 0) {
-                    while (cursorStud.moveToNext()) {
-                        if (etUname.getText().toString().equals(cursorStud.getString(1)) && etPass.getText().toString().equals(cursorStud.getString(2))) {
-                            try {
-                                startStud(cursorStud.getLong(0));
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+
                     }
                 }else Toast.makeText(MainActivity.this, "Neispravan unos", Toast.LENGTH_SHORT).show();
             }else Toast.makeText(MainActivity.this, "Popunite sva polja", Toast.LENGTH_SHORT).show();
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     /*void createTablesAndInitData(){
         dbHelper.createTables();
     }*/
+
 
     public void startAdmin() throws InterruptedException {
         Intent intent = new Intent(this, AdminActivity.class);

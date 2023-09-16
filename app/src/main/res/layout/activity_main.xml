@@ -58,18 +58,34 @@
         app:layout_constraintStart_toStartOf="@+id/etUname"
         app:layout_constraintTop_toBottomOf="@+id/etUname" />
 
+    <EditText
+        android:id="@+id/etRola"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="role"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:textColorHint="#8D6E63"
+        app:layout_constraintEnd_toEndOf="@+id/etPass"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/etPass"
+        app:layout_constraintTop_toBottomOf="@+id/etPass" />
+
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="122dp"
         android:layout_height="64dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="160dp"
         android:backgroundTint="#43FB00"
         android:text="@string/btnLogin"
         android:textColor="#607D8B"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/etPass"
-        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintHorizontal_bias="0.488"
         app:layout_constraintStart_toStartOf="@+id/etPass"
         app:layout_constraintTop_toBottomOf="@+id/etPass" />
 

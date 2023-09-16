@@ -16,18 +16,28 @@
             android:title="Dodavanje studenta"/>
         <item
             android:id="@+id/dodSkGod"
-            android:title="Dodavanje skolske godine"/>
-        <item
-            android:id="@+id/dodPred"
-            android:title="Dodavanje predmeta u skolsku"/>
+            android:title="Dodavanje godina i predmeta"/>
         <item
             android:id="@+id/dodKat"
-            android:title="Dodavanje kategorija na predmet"/>
+            android:title="Dodavanje kategorija"/>
+        <item
+            android:id="@+id/dodelaStudNaPredmet"
+            android:title="Dodeljivanje studenata"/>
+        <item
+            android:id="@+id/poeni"
+            android:title="Azuriranje poena"/>
+        <item
+            android:id="@+id/obrisiStud"
+            android:title="Brisanje studenta"/>
         <item
             android:id="@+id/upisOcene"
             android:title="Upis ocene"/>
+        <item
+            android:id="@+id/pretrage"
+            android:title="Pretrage"/>
 
     </group>
+
     <item
         android:title="">
         <menu>
