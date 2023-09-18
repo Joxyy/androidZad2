@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.example.eindexdb.sqlite.model.Admin;
+import com.example.eindexdb.sqlite.model.Predmet;
 import com.example.eindexdb.sqlite.model.Student;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class DBhelper extends SQLiteOpenHelper {
     private static final String TABLE_YEARS = "godine";
     private static final String TABLE_SUBJECTS = "predmeti";
     private static final String TABLE_KAT = "kategorije";
-
+    private static final String TABLE_GRADES = "ocene";
     //common column names
     private static final String KEY_ID = "_id";
     private static final String KEY_UNAME = "uname";
@@ -56,12 +57,11 @@ public class DBhelper extends SQLiteOpenHelper {
     private static final String KEY_PREDMET_ID = "predmetID";
     private static final String KEY_GODINA_ID = "godinaID";
     //kat column names
-    private static final String KEY_PREDMET = "predmet";
-    private static final String KEY_KATEGORIJA = "kategorija";
-    private static final String KEY_MIN = "min ";
-    private static final String KEY_MAX = "max ";
-    private static final String KEY_BODOVI = "bodovi ";
-    private static final String KEY_OCENA = "ocena ";
+    private static final String KEY_STUD_ID = "studentId";
+    private static final String KEY_MIN = "min";
+    private static final String KEY_MAX = "max";
+    private static final String KEY_BODOVI = "bodovi";
+    private static final String KEY_OCENA = "ocena";
 
     //table create statements
     String CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS +
@@ -86,6 +86,13 @@ public class DBhelper extends SQLiteOpenHelper {
             " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + KEY_IME + " INTEGER, "
             + KEY_MAX + " INTEGER, "
+            + KEY_MIN + " INTEGER, "
+            + KEY_PREDMET_ID + " INTEGER, "
+            + KEY_GODINA_ID + " INTEGER);";
+    String CREATE_TABLE_GRADES = "CREATE TABLE IF NOT EXISTS " + TABLE_GRADES +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_OCENA + " INTEGER, "
+            + KEY_STUD_ID + " INTEGER, "
             + KEY_PREDMET_ID + " INTEGER, "
             + KEY_GODINA_ID + " INTEGER);";
     @Override
@@ -94,6 +101,7 @@ public class DBhelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_STUDENTS);
         db.execSQL(CREATE_TABLE_YEARS);
         db.execSQL(CREATE_TABLE_SUBJECTS);
+        db.execSQL(CREATE_TABLE_GRADES);
     }
 
     @Override
@@ -102,6 +110,7 @@ public class DBhelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_STUDENTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_YEARS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SUBJECTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_GRADES);
 
     onCreate(db);
     }
@@ -112,6 +121,9 @@ public class DBhelper extends SQLiteOpenHelper {
         //vreating required tables
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_STUDENTS);
+        db.execSQL(CREATE_TABLE_YEARS);
+        db.execSQL(CREATE_TABLE_SUBJECTS);
+        db.execSQL(CREATE_TABLE_KAT);
     }
     public void dropTables(){   //delete tabels
 
@@ -165,9 +177,70 @@ public class DBhelper extends SQLiteOpenHelper {
         //now we know id obtained after writing actor to a db
         return user_id;
     }
-    public void addGodPred(String godina, String predmet){
+    public long addPred(String pred){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
 
+        values.put(KEY_IME, pred);
+
+        //insert row
+        long pred_id = db.insert(TABLE_SUBJECTS, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+        if(pred_id == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
+        //now we know id obtained after writing actor to a db
+        return pred_id;
     }
+    public long addYear(String god){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+
+        values.put(KEY_IME, god);
+
+        //insert row
+        long god_id = db.insert(TABLE_YEARS, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+        if(god_id == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
+        //now we know id obtained after writing actor to a db
+        return god_id;
+    }
+    public void addKat(Predmet p){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        for(String kat : p.getKategorije()){
+            ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+            values.put(KEY_IME, kat);
+            values.put(KEY_MAX, p.getMaxPoeni().get(p.getKategorije().indexOf(kat)));
+            values.put(KEY_MIN, p.getMinPoeni().get(p.getKategorije().indexOf(kat)));
+            values.put(KEY_PREDMET_ID, findPredID(p.getNazivPredmeta()));
+            values.put(KEY_GODINA_ID, findGodID(p.getGod()));
+
+            //insert row
+            long pred_id = db.insert(TABLE_KAT, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+            if(pred_id == -1){
+                Toast.makeText(context, kat + "Failed", Toast.LENGTH_SHORT).show();
+            }else Toast.makeText(context, kat + "Added successfully", Toast.LENGTH_SHORT).show();
+        }
+    }
+    public long addStudNaPred(String index, String pred, String god){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+
+        values.put(KEY_STUD_ID, findStudID(index));
+        values.put(KEY_PREDMET_ID, findPredID(pred));
+        values.put(KEY_GODINA_ID, findGodID(god));
+        values.put(KEY_OCENA, "nije polozio");
+
+        //insert row
+        long ocena_id = db.insert(TABLE_GRADES, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+        if(ocena_id == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
+        //now we know id obtained after writing actor to a db
+        return ocena_id;
+    }
+
     public Cursor readAllUsers(){
         String query = "SELECT * FROM " + TABLE_USERS;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -192,6 +265,31 @@ public class DBhelper extends SQLiteOpenHelper {
         }
         return cursor;
     }
+    public Cursor readAllSubjects(){
+        String query = "SELECT * FROM " + TABLE_SUBJECTS;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Log.e(LOG, query);
+
+        Cursor cursor = null;
+        if(db!=null){
+            cursor=db.rawQuery(query, null);
+        }
+        return cursor;
+    }
+    public Cursor readAllYears(){
+        String query = "SELECT * FROM " + TABLE_YEARS;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Log.e(LOG, query);
+
+        Cursor cursor = null;
+        if(db!=null){
+            cursor=db.rawQuery(query, null);
+        }
+        return cursor;
+    }
+
     @SuppressLint("Range")
     public Student getStud(Long stud_id){
         SQLiteDatabase db = this.getReadableDatabase();
@@ -214,6 +312,42 @@ public class DBhelper extends SQLiteOpenHelper {
 
         return s;
 
+    }
+    @SuppressLint("Range")
+    public long findPredID(String pred){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_SUBJECTS + " WHERE " + KEY_IME + " = '" + pred + "'";
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long pred_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return pred_id;
+    }
+    @SuppressLint("Range")
+    public long findGodID(String god){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_YEARS + " WHERE " + KEY_IME + " = '" + god + "'";
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long god_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return god_id;
+    }
+    @SuppressLint("Range")
+    public long findStudID(String index){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_STUDENTS + " WHERE " + KEY_INDEX + " = '" + index + "'";
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long stud_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return stud_id;
     }
 
 

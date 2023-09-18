@@ -54,7 +54,15 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodAdminFragment()).commit();
         } else if (itemId == id.dodStud) {
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodStudFragment()).commit();
-        } else if (itemId == id.logout) {
+        } else if (itemId == id.dodGodPred) {
+            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new GodPredFragment()).commit();
+        } else if (itemId == id.dodKat) {
+            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new KatFragment()).commit();
+        }else if (itemId == id.dodelaStudNaPredmet) {
+            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodelaStudNaPredFragment()).commit();
+        }else if (itemId == id.pretrage) {
+            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new PretragaFragment()).commit();
+        }else if (itemId == id.logout) {
             setResult(RESULT_OK, intent);
             finish();
         } else {

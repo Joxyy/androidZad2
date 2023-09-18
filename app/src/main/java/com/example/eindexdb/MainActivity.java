@@ -74,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                }
-                if(cursor.getCount() != 0) {
+                }else if(cursor.getCount() != 0) {
                     while (cursor.moveToNext()) {
                         if (etUname.getText().toString().equals(cursor.getString(1)) && etPass.getText().toString().equals(cursor.getString(2)) && etRola.getText().toString().equalsIgnoreCase(cursor.getString(3))) {
                             if(cursor.getString(3).equals("admin")) {
