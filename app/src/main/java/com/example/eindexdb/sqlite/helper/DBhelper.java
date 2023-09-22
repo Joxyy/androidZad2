@@ -9,13 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 
-import com.example.eindexdb.sqlite.model.Admin;
 import com.example.eindexdb.sqlite.model.Predmet;
 import com.example.eindexdb.sqlite.model.Student;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DBhelper extends SQLiteOpenHelper {
     SQLiteDatabase db;
@@ -41,6 +40,7 @@ public class DBhelper extends SQLiteOpenHelper {
     private static final String TABLE_YEARS = "godine";
     private static final String TABLE_SUBJECTS = "predmeti";
     private static final String TABLE_KAT = "kategorije";
+    private static final String TABLE_BOD = "bodovi";
     private static final String TABLE_GRADES = "ocene";
     //common column names
     private static final String KEY_ID = "_id";
@@ -56,6 +56,7 @@ public class DBhelper extends SQLiteOpenHelper {
     //godPred column names
     private static final String KEY_PREDMET_ID = "predmetID";
     private static final String KEY_GODINA_ID = "godinaID";
+    private static final String KEY_KAT_ID = "katID";
     //kat column names
     private static final String KEY_STUD_ID = "studentId";
     private static final String KEY_MIN = "min";
@@ -89,12 +90,18 @@ public class DBhelper extends SQLiteOpenHelper {
             + KEY_MIN + " INTEGER, "
             + KEY_PREDMET_ID + " INTEGER, "
             + KEY_GODINA_ID + " INTEGER);";
+    String CREATE_TABLE_BOD = "CREATE TABLE IF NOT EXISTS " + TABLE_BOD +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_BODOVI + " INTEGER, "
+            + KEY_KAT_ID + " INTEGER, "
+            + KEY_STUD_ID + " INTEGER);";
     String CREATE_TABLE_GRADES = "CREATE TABLE IF NOT EXISTS " + TABLE_GRADES +
             " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + KEY_OCENA + " INTEGER, "
+            + KEY_OCENA + " TEXT, "
             + KEY_STUD_ID + " INTEGER, "
             + KEY_PREDMET_ID + " INTEGER, "
             + KEY_GODINA_ID + " INTEGER);";
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
@@ -102,6 +109,7 @@ public class DBhelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_YEARS);
         db.execSQL(CREATE_TABLE_SUBJECTS);
         db.execSQL(CREATE_TABLE_GRADES);
+        db.execSQL(CREATE_TABLE_BOD);
     }
 
     @Override
@@ -111,6 +119,7 @@ public class DBhelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_YEARS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SUBJECTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_GRADES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOD);
 
     onCreate(db);
     }
@@ -124,6 +133,7 @@ public class DBhelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_YEARS);
         db.execSQL(CREATE_TABLE_SUBJECTS);
         db.execSQL(CREATE_TABLE_KAT);
+        db.execSQL(CREATE_TABLE_GRADES);
     }
     public void dropTables(){   //delete tabels
 
@@ -223,6 +233,57 @@ public class DBhelper extends SQLiteOpenHelper {
             }else Toast.makeText(context, kat + "Added successfully", Toast.LENGTH_SHORT).show();
         }
     }
+    public int addBod(String index, String pred, String god){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+
+        for(String t : findKatByPredGod(pred, god)) {
+            //values.put(KEY_KAT_ID, findKatID(pred, god, findKatByPredGod(pred, god)));
+            values.put(KEY_KAT_ID, findKatID(pred,god,t));
+            values.put(KEY_STUD_ID, findStudID(index));
+            values.put(KEY_BODOVI, 0);
+
+
+            //insert row
+            long bod_id = db.insert(TABLE_BOD, null, values);//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+            if (bod_id == -1) {
+                Toast.makeText(context, " Failed", Toast.LENGTH_SHORT).show();
+            } else Toast.makeText(context, " Added successfully", Toast.LENGTH_SHORT).show();
+        }
+        //now we know id obtained after writing actor to a db
+        return 0;
+    }
+    public long updateBod(String index, String pred, String god, String kat, int bod){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+
+        values.put(KEY_KAT_ID, findKatID(pred, god, kat));
+        values.put(KEY_STUD_ID, findStudID(index));
+        values.put(KEY_BODOVI, bod);
+
+        //insert row
+        long bod_id = db.update(TABLE_BOD, values, "_id=?", new String[]{String.valueOf(findBodID(index,pred,god, kat))});;//null sluzzi za upis bez neke kolone (tj onda unosimo tu kolonu)
+        if(bod_id == -1){
+            Toast.makeText(context, " Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, " Added successfully", Toast.LENGTH_SHORT).show();
+        //now we know id obtained after writing actor to a db
+        return bod_id;
+    }
+    public void updateGrades(String index, String pred, String god, String ocena){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
+
+        values.put(KEY_OCENA, ocena);
+
+        //insert row
+        long ocena_id = db.update(TABLE_GRADES, values, "_id=?", new String[]{String.valueOf(findOcenaID(index,pred,god))});
+        if(ocena_id == -1){
+            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+        }else Toast.makeText(context, "Added successfully", Toast.LENGTH_SHORT).show();
+        //now we know id obtained after writing actor to a db
+
+
+    }
     public long addStudNaPred(String index, String pred, String god){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues(); //za upis u bazu se koristi, cuva kljuc vrednost oblik
@@ -240,6 +301,7 @@ public class DBhelper extends SQLiteOpenHelper {
         //now we know id obtained after writing actor to a db
         return ocena_id;
     }
+
 
     public Cursor readAllUsers(){
         String query = "SELECT * FROM " + TABLE_USERS;
@@ -314,6 +376,58 @@ public class DBhelper extends SQLiteOpenHelper {
 
     }
     @SuppressLint("Range")
+    public String getPred(Long pred_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_SUBJECTS + " WHERE " + KEY_ID + " = " + pred_id;
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+
+        String p = cursor.getString(cursor.getColumnIndex(KEY_IME));
+        return p;
+
+    }
+    @SuppressLint("Range")
+    public Predmet getPredKat(String pred, String god){
+        Predmet p = new Predmet();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_KAT + " WHERE " + KEY_PREDMET_ID + " = " + findPredID(pred) + " AND " + KEY_GODINA_ID + " = " + findGodID(god);
+
+        Log.e(LOG, query);
+
+
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor.moveToFirst()){
+            do{
+                p.dodKat(cursor.getString(cursor.getColumnIndex(KEY_IME)));
+                p.dodMax(cursor.getInt(cursor.getColumnIndex(KEY_MAX)));
+                p.dodMin(cursor.getInt(cursor.getColumnIndex(KEY_MIN)));
+
+            }while (cursor.moveToNext());
+        }
+        if(cursor!=null) cursor.moveToFirst();
+
+        return p;
+
+    }
+    @SuppressLint("Range")
+    public String getGod(Long god_id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_YEARS + " WHERE " + KEY_ID + " = " + god_id;
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+
+        String g = cursor.getString(cursor.getColumnIndex(KEY_IME));
+        return g;
+
+    }
+    @SuppressLint("Range")
     public long findPredID(String pred){
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_SUBJECTS + " WHERE " + KEY_IME + " = '" + pred + "'";
@@ -324,6 +438,32 @@ public class DBhelper extends SQLiteOpenHelper {
         if(cursor!=null) cursor.moveToFirst();
         long pred_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
         return pred_id;
+    }
+    @SuppressLint("Range")
+    public long findOcenaID(String index, String pred, String god){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_GRADES + " WHERE " + KEY_PREDMET_ID + " = " + findPredID(pred) + " AND " + KEY_GODINA_ID + " = " + findGodID(god)
+        +" AND " + KEY_STUD_ID + " = " + findStudID(index);
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long ocena_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return ocena_id;
+    }
+    @SuppressLint("Range")
+    public long findBodID(String index, String pred, String god, String kat){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_BOD + " WHERE " + KEY_KAT_ID + " = " + findKatID(pred, god, kat)
+                +" AND " + KEY_STUD_ID + " = " + findStudID(index);
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long bod_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return bod_id;
     }
     @SuppressLint("Range")
     public long findGodID(String god){
@@ -349,7 +489,92 @@ public class DBhelper extends SQLiteOpenHelper {
         long stud_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
         return stud_id;
     }
+    @SuppressLint("Range")
+    public ArrayList<String> findPredByStudID(long stud_id){
+        ArrayList<String> predmeti = new ArrayList<String>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_GRADES + " WHERE " + KEY_STUD_ID + " = " + stud_id;
 
+        //String query = "SELECT  p." + KEY_ID + ", m." + KEY_ID + " FROM " + TABLE_SUBJECTS + " p, "
+        //        + TABLE_YEARS + " g, " + TABLE_GRADES + " o WHERE " + KEY_ID + " = " + stud_id;
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) {
+            cursor.moveToFirst();
+            do{
+                long pred_id = cursor.getInt(cursor.getColumnIndex(KEY_PREDMET_ID));
+                String p= getPred(pred_id);
+                long god_id = cursor.getInt(cursor.getColumnIndex(KEY_GODINA_ID));
+                String g= getGod(god_id);
+                predmeti.add(p + " " + g);
+            }while(cursor.moveToNext());
+            return predmeti;
+        }
+        return null;
+    }
+    @SuppressLint("Range")
+    public ArrayList<String> findKatByPredGod(String pred, String god){
+        ArrayList<String> kat = new ArrayList<String>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_KAT + " WHERE " + KEY_PREDMET_ID + " = " + findPredID(pred) + " AND " + KEY_GODINA_ID + " = " + findGodID(god);
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) {
+            cursor.moveToFirst();
+            do{
+                kat.add(cursor.getString(cursor.getColumnIndex(KEY_IME)));
+            }while(cursor.moveToNext());
+            return kat;
+        }
+        return null;
+    }
+
+
+    @SuppressLint("Range")
+    public int findBodovi(String kat,String pred, String god, String index){
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_BOD + " WHERE " + KEY_KAT_ID + " = " + findKatID(pred,god, kat) + " AND " + KEY_STUD_ID + " = " + findStudID(index);
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        int bodovi= cursor.getInt(cursor.getColumnIndex(KEY_BODOVI));
+        return bodovi;
+    }
+    @SuppressLint("Range")
+    public long findKatID(String pred, String god, String kat){
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_KAT + " WHERE " + KEY_PREDMET_ID + " = " + findPredID(pred) + " AND " + KEY_GODINA_ID + " = " + findGodID(god)
+        + " AND " + KEY_IME + " = '" + kat + "'";
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        long kat_id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+        return kat_id;
+    }
+    @SuppressLint("Range")
+    public String findOcena(Long studID, String pred, String god){
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_GRADES + " WHERE " + KEY_STUD_ID + " = " + studID + " AND " + KEY_GODINA_ID + " = " + findGodID(god)
+                + " AND " + KEY_PREDMET_ID + " = " + findPredID(pred);
+
+        Log.e(LOG, query);
+
+        Cursor cursor = db.rawQuery(query,null);
+        if(cursor!=null) cursor.moveToFirst();
+        String ocena = cursor.getString(cursor.getColumnIndex(KEY_OCENA));
+        return ocena;
+    }
 
     /*getting all students*/
     /*@SuppressLint("Range")

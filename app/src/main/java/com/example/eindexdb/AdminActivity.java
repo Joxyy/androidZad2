@@ -60,6 +60,8 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new KatFragment()).commit();
         }else if (itemId == id.dodelaStudNaPredmet) {
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new DodelaStudNaPredFragment()).commit();
+        }else if (itemId == id.poeni) {
+            getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new BodoviAzurFragment()).commit();
         }else if (itemId == id.pretrage) {
             getSupportFragmentManager().beginTransaction().replace(id.fragment_container, new PretragaFragment()).commit();
         }else if (itemId == id.logout) {

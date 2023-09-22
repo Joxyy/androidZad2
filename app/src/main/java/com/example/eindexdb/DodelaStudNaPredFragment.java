@@ -99,6 +99,7 @@ public class DodelaStudNaPredFragment extends Fragment {
         }
         btnDodelaStudNaPred.setOnClickListener(view1->{
             myDB.addStudNaPred(spnStud.getSelectedItem().toString().split(" ")[0].trim(), spnPred2.getSelectedItem().toString(),spnGod2.getSelectedItem().toString());
+            myDB.addBod(spnStud.getSelectedItem().toString().split(" ")[0].trim(),spnPred2.getSelectedItem().toString() ,spnGod2.getSelectedItem().toString());
         });
 
 

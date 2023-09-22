@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.eindexdb.sqlite.helper.DBhelper;
 
@@ -39,12 +40,14 @@ public class DodStudFragment extends Fragment {
         btnDodStud.setOnClickListener(view1 -> {
             DBhelper myDB = new DBhelper(getActivity());
             myDB.createTables();
-            myDB.addStud(etStudUname.getText().toString().trim(),
-                    etStudPass.getText().toString().trim(),
-                    etStudIme.getText().toString().trim(),
-                    etStudPrezime.getText().toString().trim(),
-                    etStudIndex.getText().toString().trim(),
-                    etStudJmbg.getText().toString().trim());
+            if(etStudJmbg.getText().toString().matches("^\\d{13}$")){
+                myDB.addStud(etStudUname.getText().toString().trim(),
+                        etStudPass.getText().toString().trim(),
+                        etStudIme.getText().toString().trim(),
+                        etStudPrezime.getText().toString().trim(),
+                        etStudIndex.getText().toString().trim(),
+                        etStudJmbg.getText().toString().trim());
+            }else Toast.makeText(getActivity(), "Neispravan jmbg", Toast.LENGTH_SHORT).show();
         });
 
         return view;
